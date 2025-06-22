@@ -20,6 +20,15 @@ const ProductList = ({ products }) => {
 
     const handleAddToCart = async (productId) => {
         try {
+            const totalWeight = cart.reduce((sum, id) => {
+                const product = products.find(p => p._id === id);
+                return product ? sum + product.weight : sum;
+            }, 0);
+            const productToAdd = products.find(p => p._id === productId);
+            if (productToAdd && totalWeight + productToAdd.weight > 3) {
+                alert('Poids total du panier dépassé (max 3kg).');
+                return;
+            }
             const user = JSON.parse(localStorage.getItem('user') || '{}');
             const token = user.token;
             await axios.put(`${baseUrl}/user/cart`, { productId: productId }, {
@@ -52,6 +61,57 @@ const ProductList = ({ products }) => {
     };
 
     const handleValidateCart = async () => {
+
+        const totalPrice = cart.reduce((sum, productId) => {
+            const product = products.find(p => p._id === productId);
+            return product ? sum + product.price : sum;
+        }, 0);
+        console.log('Total price:', totalPrice);
+
+        const address = window.prompt(`Veuillez entrer votre adresse de livraison (Prix total : ${totalPrice}€) :`);
+        if (!address) {
+            alert('Adresse requise pour valider la commande.');
+            return;
+        }
+        let coordinates = address;
+        try {
+            // Use Nominatim OpenStreetMap API to convert address to coordinates
+            const response = await axios.get('https://nominatim.openstreetmap.org/search', {
+                params: {
+                    q: address,
+                    format: 'json',
+                    limit: 1
+                }
+            });
+            if (response.data && response.data.length > 0) {
+                coordinates = {
+                    lat: response.data[0].lat,
+                    lon: response.data[0].lon
+                };
+            } else {
+                alert('Adresse introuvable, la commande sera envoyée à l\'adresse saisie telle quelle.');
+            }
+        } catch (err) {
+            console.error('Failed to convert address to coordinates:', err);
+            alert('Erreur lors de la conversion de l\'adresse. La commande sera envoyée à l\'adresse saisie telle quelle.');
+        }
+
+        console.log('Coordinates for order:', coordinates);
+        
+        axios.put(`${baseUrl}/order`, { coordinates: coordinates, products: cart, price: totalPrice }, {
+            headers: {
+                token: JSON.parse(localStorage.getItem('user') || '{}').token
+            }
+        })
+            .then(res => {
+                console.log('Order placed successfully:', res.data);
+                setCart([]);
+                alert('Votre panier a bien été commandé !');
+                window.location.reload();
+            })
+            .catch(err => {
+                console.error('Failed to validate cart:', err);
+            });
     }
 
     if (!products || products.length === 0) {
