@@ -3,7 +3,7 @@ import './App.css'
 import './App.scss'
 import skyDropLogo from './assets/SkyDrop.png'
 import axios from 'axios'
-import ProductList from './productList'
+import ProductList from './ProductList.jsx'
 
 const baseUrl = import.meta.env.VITE_BASE_URL || 'http://localhost:3001'
 
