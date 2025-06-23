@@ -25,8 +25,8 @@ const ProductList = ({ products }) => {
                 return product ? sum + product.weight : sum;
             }, 0);
             const productToAdd = products.find(p => p._id === productId);
-            if (productToAdd && totalWeight + productToAdd.weight > 3) {
-                alert('Poids total du panier dépassé (max 3kg).');
+            if (productToAdd && totalWeight + productToAdd.weight > 3000) {
+                alert('Poids total du panier dépassé (max 3000g).');
                 return;
             }
             const user = JSON.parse(localStorage.getItem('user') || '{}');
@@ -144,9 +144,7 @@ const ProductList = ({ products }) => {
                             <p className="product-list__stock">
                                 Stock: {product.stock}
                             </p>
-                            <p className="product-list__weight">Weight: {product.weight}kg</p>
-                            {/* <p className="product-list__category">Category ID: {product.categoryId}</p> */}
-                            <p className="product-list__starred">Starred: {product.star ? 'Yes' : 'No'}</p>
+                            <p className="product-list__weight">Poids: {product.weight}g</p>
                             <div className='flex justify-between align-center'>
                                 <button
                                     className='product-list__remove-from-cart'

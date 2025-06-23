@@ -3,5 +3,5 @@ services:
   react-app:
     build: .
     ports:
-      - "8080:80"
+      - "3004:80"
     restart: unless-stopped
